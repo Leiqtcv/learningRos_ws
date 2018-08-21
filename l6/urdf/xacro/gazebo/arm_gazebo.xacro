@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<robot name="arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- PROPERTY LIST -->
+    <xacro:property name="link_1_cylinder_mass" value="10"/>
+    <xacro:property name="link_1_sphere_mass" value="10"/>
+    <xacro:property name="link_1_length" value="0.08"/>
+    <xacro:property name="link_1_radius" value="0.05"/>
+
+    <xacro:property name="link_2_cylinder_mass" value="10"/>
+    <xacro:property name="link_2_sphere_mass" value="10"/>
+    <xacro:property name="link_2_length" value="0.08"/>
+    <xacro:property name="link_2_radius" value="0.05"/>
+
+    <xacro:property name="link_3_cylinder_mass" value="10"/>
+    <xacro:property name="link_3_sphere_mass" value="10"/>
+    <xacro:property name="link_3_length" value="0.08"/>
+    <xacro:property name="link_3_radius" value="0.05"/>
+    <!-- Defining the colors used in this robot -->
+    <material name="green">
+        <color rgba="0.5 1 0.5 1"/>
+    </material>
+
+    <!-- link models-->
+    <xacro:macro name="arm_link" params="prefix link1_length link1_radius link2_length link2_radius link2_sphere_mass link2_cylinder_mass">
+	<joint name="arm_joint${prefix}" type="continuous">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <parent link="arm_link${prefix-1}_3"/>
+            <child link="arm_link${prefix}_1"/>
+            <axis xyz="0 1 0"/>
+        </joint>
+
+	<transmission name="arm_joint${prefix}_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="arm_joint${prefix}" >
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="arm_joint${prefix}_motor">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+	<link name="arm_link${prefix}_1">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <sphere radius="${link2_radius}"/>
+            	</geometry>
+            	<material name="green" />
+            </visual>
+	    <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <sphere radius="${link2_radius}"/>
+                </geometry>
+            </collision>      
+            <sphere_inertial_matrix  m="${link2_sphere_mass}" r="${link2_radius}" />
+    	</link>
+	<gazebo reference="arm_link${prefix}_1">
+            <material>Gazebo/Green</material>
+        </gazebo>
+	<gazebo reference="arm_link${prefix}_1">
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+	
+	<joint name="arm_joint${prefix}_2" type="fixed">
+            <origin xyz="0 0 ${link2_length/2}" rpy="0 0 0"/>
+            <parent link="arm_link${prefix}_1"/>
+            <child link="arm_link${prefix}_2"/>
+        </joint>
+
+	<link name="arm_link${prefix}_2">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <cylinder length="${link2_length}" radius="${link2_radius}"/>
+            	</geometry>
+            	<material name="green" />
+            </visual>
+	    <collision>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <cylinder length="${link2_length}" radius="${link2_radius}"/>
+            	</geometry>
+            </collision>
+            <cylinder_inertial_matrix  m="${link2_cylinder_mass}" r="${link2_radius}" h="${link2_length}" />
+    	</link>
+	<gazebo reference="arm_link${prefix}_2">
+            <material>Gazebo/Green</material>
+        </gazebo>
+	<gazebo reference="arm_link${prefix}_2">
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+
+	<joint name="arm_joint${prefix}_3" type="fixed">
+            <origin xyz="0 0 ${link2_length/2}" rpy="0 0 0"/>
+            <parent link="arm_link${prefix}_2"/>
+            <child link="arm_link${prefix}_3"/>
+        </joint>
+
+	<link name="arm_link${prefix}_3">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <sphere radius="${link2_radius}"/>
+            	</geometry>
+            	<material name="green" />
+            </visual>
+	    <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <sphere radius="${link2_radius}"/>
+                </geometry>
+            </collision>      
+            <sphere_inertial_matrix  m="${link2_sphere_mass}" r="${link2_radius}" />
+    	</link>
+	<gazebo reference="arm_link${prefix}_3">
+            <material>Gazebo/Green</material>
+        </gazebo>
+	<gazebo reference="arm_link${prefix}_3">
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+
+    </xacro:macro>
+
+    <xacro:macro name="arm">
+	<joint name="arm_joint1_1" type="continuous">
+            <origin xyz="0 0 ${base_length/2+link_1_length/2}" rpy="0 0 0"/>
+            <parent link="base_link"/>
+            <child link="arm_link1_1"/>
+            <axis xyz="0 0 1"/>
+        </joint>
+	<!-- Transmission is important to link the joints and the controller -->
+        <transmission name="arm_joint1_1_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="arm_joint1_1" >
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="arm_joint1_1_motor">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+	<link name="arm_link1_1">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <cylinder length="${link_1_length}" radius="${link_1_radius}"/>
+            	</geometry>
+            	<material name="green" />
+            </visual>
+	    <collision>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+                <geometry>
+                    <cylinder length="${link_1_length}" radius="${link_1_radius}"/>
+                </geometry>
+            </collision>
+            <cylinder_inertial_matrix  m="${link_1_cylinder_mass}" r="${link_1_radius}" h="${link_1_length}" />
+    	</link>
+	<gazebo reference="arm_link1_1">
+            <material>Gazebo/Green</material>
+        </gazebo>
+
+	<joint name="arm_joint1_2" type="fixed">
+            <origin xyz="0 0 ${link_1_length/2}" rpy="0 0 0"/>
+            <parent link="arm_link1_1"/>
+            <child link="arm_link1_3"/>
+        </joint>
+	
+	<link name="arm_link1_3">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <sphere radius="${link_1_radius}"/>
+            	</geometry>
+            	<material name="green" />
+            </visual>
+	    <collision>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+            	<geometry>
+                    <sphere radius="${link_1_radius}"/>
+            	</geometry>
+            </collision>      
+            <sphere_inertial_matrix  m="${link_1_sphere_mass}" r="${link_2_radius}" />
+    	</link>
+	
+	<gazebo reference="arm_link1_3">
+            <material>Gazebo/Green</material>
+        </gazebo>
+	<gazebo reference="arm_link1_3">
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+
+	<arm_link prefix="2" link1_length="${link_1_length}" link1_radius="${link_1_radius}" link2_length="${link_2_length}" link2_radius="${link_2_radius}" link2_sphere_mass="${link_2_sphere_mass}" link2_cylinder_mass="${link_2_cylinder_mass}"/>
+	<arm_link prefix="3" link1_length="${link_2_length}" link1_radius="${link_2_radius}" link2_length="${link_3_length}" link2_radius="${link_3_radius}" link2_sphere_mass="${link_3_sphere_mass}" link2_cylinder_mass="${link_3_cylinder_mass}"/>
+
+    </xacro:macro>
+   
+</robot>
