@@ -13,8 +13,8 @@
     <xacro:property name="wheel_joint_y" value="0.19"/>
     <xacro:property name="wheel_joint_z" value="0.05"/>
 
-    <xacro:property name="caster_mass"    value="0.5" />
-    <xacro:property name="caster_radius" value="0.015"/> <!-- (wheel_radius - ( base_length/2 - wheel_joint_z))/2 -->
+    <xacro:property name="caster_mass"    value="0.5" /> 
+    <xacro:property name="caster_radius"  value="0.015"/> <!-- wheel_radius - ( base_length/2 - wheel_joint_z) -->
     <xacro:property name="caster_joint_x" value="0.18"/>
 
     <!-- Defining the colors used in this robot -->
@@ -29,21 +29,21 @@
     </material>
     
     <!-- Macro for inertia matrix -->
-    <xacro:macro name="cylinder_inertial_matrix" params="m r h">
-        <inertial>
-            <mass value="${m}" />
-            <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
-                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
-                izz="${m*r*r/2}" /> 
-        </inertial>
-    </xacro:macro>
-
     <xacro:macro name="sphere_inertial_matrix" params="m r">
         <inertial>
             <mass value="${m}" />
             <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
                 iyy="${2*m*r*r/5}" iyz="0" 
                 izz="${2*m*r*r/5}" />
+        </inertial>
+    </xacro:macro>
+
+    <xacro:macro name="cylinder_inertial_matrix" params="m r h">
+        <inertial>
+            <mass value="${m}" />
+            <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+                izz="${m*r*r/2}" /> 
         </inertial>
     </xacro:macro>
 
@@ -64,7 +64,7 @@
                 </geometry>
                 <material name="gray" />
             </visual>
-	    <collision>
+            <collision>
                 <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
                 <geometry>
                     <cylinder radius="${wheel_radius}" length = "${wheel_length}"/>
@@ -72,10 +72,12 @@
             </collision>
             <cylinder_inertial_matrix  m="${wheel_mass}" r="${wheel_radius}" h="${wheel_length}" />
         </link>
-	<gazebo reference="${prefix}_wheel_link">
+
+        <gazebo reference="${prefix}_wheel_link">
             <material>Gazebo/Gray</material>
         </gazebo>
-	<!-- Transmission is important to link the joints and the controller -->
+
+        <!-- Transmission is important to link the joints and the controller -->
         <transmission name="${prefix}_wheel_joint_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}_wheel_joint" >
@@ -105,7 +107,7 @@
                 </geometry>
                 <material name="black" />
             </visual>
-	    <collision>
+            <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <sphere radius="${caster_radius}" />
@@ -113,9 +115,13 @@
             </collision>      
             <sphere_inertial_matrix  m="${caster_mass}" r="${caster_radius}" />
         </link>
+
+        <gazebo reference="${prefix}_caster_link">
+            <material>Gazebo/Black</material>
+        </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="mbot_base">
+    <xacro:macro name="mbot_base_gazebo">
         <link name="base_footprint">
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
@@ -124,7 +130,7 @@
                 </geometry>
             </visual>
         </link>
-	<gazebo reference="base_footprint">
+        <gazebo reference="base_footprint">
             <turnGravityOff>false</turnGravityOff>
         </gazebo>
 
@@ -142,7 +148,7 @@
                 </geometry>
                 <material name="yellow" />
             </visual>
-	    <collision>
+            <collision>
                 <origin xyz=" 0 0 0" rpy="0 0 0" />
                 <geometry>
                     <cylinder length="${base_length}" radius="${base_radius}"/>
@@ -151,16 +157,17 @@
             <cylinder_inertial_matrix  m="${base_mass}" r="${base_radius}" h="${base_length}" />
         </link>
 
-	<gazebo reference="base_link">
+        <gazebo reference="base_link">
             <material>Gazebo/Blue</material>
         </gazebo>
 
-        <wheel prefix="left" reflect="-1"/>
+        <wheel prefix="left"  reflect="-1"/>
         <wheel prefix="right" reflect="1"/>
 
         <caster prefix="front" reflect="-1"/>
-        <caster prefix="back" reflect="1"/>
-	<!-- controller -->
+        <caster prefix="back"  reflect="1"/>
+
+        <!-- controller -->
         <gazebo>
             <plugin name="differential_drive_controller" 
                     filename="libgazebo_ros_diff_drive.so">
@@ -186,4 +193,5 @@
             </plugin>
         </gazebo> 
     </xacro:macro>
+
 </robot>
